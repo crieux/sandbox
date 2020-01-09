@@ -2,13 +2,14 @@
 #                                     IMPORT LIBRARIES
 ##########################################################################################
 
-# Data science
-# import pandas as pd
+# Python
+import typing
 
 # Dashboard
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
+from dash.dependencies import Input, Output
 
 # Process
 from pet_projects.dashboards.iris_process import parse_iris_data
@@ -33,12 +34,38 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 ##########################################################################################
 
 # Header layout part
-title = html.H1(children="Simple example of Plotly Dashboard based on Iris dataset")
-header = html.Div(children="Powered by Dash: A web application framework for Python")
+page_title = html.H1(
+    children="Simple example of Plotly Dashboard", style={"text-align": "center"},
+)
+page_header = html.Div(
+    children="(Powered by Dash: A web application framework for Python)",
+    style={"text-align": "center"},
+)
 
 # Body layout part
+body_title = html.Div(
+    children="Finding correlation in Iris data set", style={"text-align": "center"},
+)
+x_axis_dropdown = dcc.Dropdown(
+    id="x-axis-dropdown",
+    options=[
+        {"label": column.capitalize().replace("_", " "), "value": column}
+        for column in IRIS_DATA.columns.to_list()[0:4]
+    ],
+    style={"width": "400px", "margin-right": 5},
+    placeholder="Select x axis data",
+)
+y_axis_dropdown = dcc.Dropdown(
+    id="y-axis-dropdown",
+    options=[
+        {"label": column.capitalize().replace("_", " "), "value": column}
+        for column in IRIS_DATA.columns.to_list()[0:4]
+    ],
+    style={"width": "400px"},
+    placeholder="Select y axis data",
+)
 sepal_scatter = dcc.Graph(
-    id="sepal-scatter",
+    id="iris-scatter",
     figure={
         "data": [
             {
@@ -55,19 +82,63 @@ sepal_scatter = dcc.Graph(
             },
         ],
         "layout": {
-            "title": "Sepal length VS sepal width",
+            "title": "Results",
             "xaxis": {"title": "Sepal length", "zeroline": False},
             "yaxis": {"title": "Sepal width", "zeroline": False},
+            "hovermode": "closest",
         },
     },
 )
-petal_scatter = dcc.Graph(
-    id="petal-scatter",
-    figure={
+
+app.layout = html.Div(
+    children=[
+        html.Div(
+            id="iris-header",
+            children=[page_title, page_header],
+            style={"margin-bottom": 25},
+        ),
+        html.Div(
+            id="iris-body",
+            children=[
+                html.Div(id="body-title", children=body_title),
+                html.Div(
+                    id="dropdowns",
+                    children=[x_axis_dropdown, y_axis_dropdown],
+                    style={
+                        "display": "flex",
+                        "align-items": "center",
+                        "justify-content": "center",
+                        "margi-top": 10,
+                    },
+                ),
+                html.Div(id="plots", children=[sepal_scatter]),
+            ],
+        ),
+    ]
+)
+
+
+##########################################################################################
+#                                       CALLBACKS
+##########################################################################################
+
+
+@app.callback(
+    Output("iris-scatter", "figure"),
+    [Input("x-axis-dropdown", "value"), Input("y-axis-dropdown", "value")],
+)
+def update_figure(
+    x_axis_dropdown_value: str, y_axis_dropdown_value: str
+) -> typing.Dict:
+    if x_axis_dropdown_value is None:
+        x_axis_dropdown_value = "sepal_length"
+    if y_axis_dropdown_value is None:
+        y_axis_dropdown_value = "sepal_width"
+    data = {
         "data": [
             {
-                "x": IRIS_DATA["petal_length"],
-                "y": IRIS_DATA["petal_width"],
+                "x": IRIS_DATA[x_axis_dropdown_value],
+                "y": IRIS_DATA[y_axis_dropdown_value],
                 "text": IRIS_DATA["species"],
                 "mode": "markers",
                 "opacity": 0.7,
@@ -79,14 +150,19 @@ petal_scatter = dcc.Graph(
             },
         ],
         "layout": {
-            "title": "Petal length VS petal width",
-            "xaxis": {"title": "Petal length", "zeroline": False},
-            "yaxis": {"title": "Petal width", "zeroline": False},
+            "title": "Results",
+            "xaxis": {
+                "title": x_axis_dropdown_value.capitalize().replace("_", " "),
+                "zeroline": False,
+            },
+            "yaxis": {
+                "title": y_axis_dropdown_value.capitalize().replace("_", " "),
+                "zeroline": False,
+            },
+            "hovermode": "closest",
         },
-    },
-)
-
-app.layout = html.Div(children=[title, header, sepal_scatter, petal_scatter])
+    }
+    return data
 
 
 ##########################################################################################
