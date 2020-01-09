@@ -130,6 +130,15 @@ app.layout = html.Div(
 def update_figure(
     x_axis_dropdown_value: str, y_axis_dropdown_value: str
 ) -> typing.Dict:
+    """
+    Callback aimed to changes the Iris scatter content by selecting x nd y axis data
+
+    :param x_axis_dropdown_value: the name of the data that will be displayed in the x
+    axis
+    :param y_axis_dropdown_value: the name of the data that will be displayed in the y
+    axis
+    :return: the data and the layout content
+    """
     if x_axis_dropdown_value is None:
         x_axis_dropdown_value = "sepal_length"
     if y_axis_dropdown_value is None:
