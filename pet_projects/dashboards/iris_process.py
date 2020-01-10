@@ -16,6 +16,12 @@ from decimal import Decimal
 import scipy.stats as ss
 from sklearn.cluster import KMeans
 from sklearn.cluster import AffinityPropagation
+from sklearn.cluster import MeanShift
+from sklearn.cluster import SpectralClustering
+from sklearn.cluster import AgglomerativeClustering
+from sklearn.cluster import DBSCAN
+from sklearn.cluster import OPTICS
+from sklearn.cluster import Birch
 
 
 ##########################################################################################
@@ -25,8 +31,8 @@ from sklearn.cluster import AffinityPropagation
 CLUSTERING_METHODS = [
     "K-means",
     "Affinity propagation",
-    "Mean-shift",
-    "Special clustering",
+    "Mean shift",
+    "Spectral clustering",
     "Ward hierarchical clustering",
     "DBSCAN",
     "OPTICS",
@@ -110,6 +116,19 @@ def compute_clustering(
         - K-means: https://scikit-learn.org/stable/modules/clustering.html#k-means
         - Affinity propagation: https://scikit-learn.org/stable/modules/generated/sklearn\
         .cluster.AffinityPropagation.html#sklearn.cluster.AffinityPropagation
+        - Mean shift: https://scikit-learn.org/stable/modules/generated/sklearn.cluster.\
+        MeanShift.html#sklearn.cluster.MeanShift
+        - Spectral clustering: https://scikit-learn.org/stable/modules/generated/sklearn.\
+        cluster.SpectralClustering.html#sklearn.cluster.SpectralClustering
+        - Hierarchical/Agglomerative clustering: https://scikit-learn.org/stable/modules\
+        /generated/sklearn.cluster.AgglomerativeClustering.html#sklearn.cluster.Agglomera\
+        tiveClustering
+        - DBSCAN: https://scikit-learn.org/stable/modules/generated/sklearn.cluster.\
+        DBSCAN.html#sklearn.cluster.DBSCAN
+        - OPTICS: https://scikit-learn.org/stable/modules/generated/sklearn.cluster.\
+        OPTICS.html#sklearn.cluster.OPTICS
+        - Birch: https://scikit-learn.org/stable/modules/generated/sklearn.cluster.Birch.\
+        html#sklearn.cluster.Birch
 
     :param x_data: the x data set
     :param y_data: the y data set
@@ -124,3 +143,24 @@ def compute_clustering(
     if method == "Affinity propagation":
         clustering = AffinityPropagation().fit(mapped_data)
         return clustering.labels_
+    if method == "Mean shift":
+        clustering = MeanShift(bandwidth=2).fit(mapped_data)
+        return clustering.labels
+    if method == "Spectral clustering":
+        clustering = SpectralClustering(
+            n_clusters=nb_clusters, assign_labels="discretize", random_state=0
+        ).fit(mapped_data)
+        return clustering.labels_
+    if method == "Ward hierarchical clustering":
+        clustering = AgglomerativeClustering(n_clusters=nb_clusters).fit(mapped_data)
+        return clustering.labels_
+    if method == "DBSCAN":
+        clustering = DBSCAN(eps=3, min_samples=2).fit(mapped_data)
+        return clustering.labels_
+    if method == "OPTICS":
+        clustering = OPTICS(min_samples=2).fit(mapped_data)
+        return clustering.labels_
+    if method == "Birch":
+        brc = Birch(n_clusters=nb_clusters)
+        brc.fit(mapped_data)
+        return brc.predict(mapped_data)

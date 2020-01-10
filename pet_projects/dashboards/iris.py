@@ -59,7 +59,7 @@ correlation_x_axis_dropdown = dcc.Dropdown(
         for column in IRIS_DATA.columns.to_list()[0:4]
     ],
     style={"width": "400px", "margin-right": 5},
-    placeholder="Select x axis data",
+    placeholder="Select x axis data (default Sepal length)",
 )
 correlation_y_axis_dropdown = dcc.Dropdown(
     id="correlation-y-axis-dropdown",
@@ -68,7 +68,7 @@ correlation_y_axis_dropdown = dcc.Dropdown(
         for column in IRIS_DATA.columns.to_list()[0:4]
     ],
     style={"width": "400px"},
-    placeholder="Select y axis data",
+    placeholder="Select y axis data (default Sepal width)",
 )
 correlation_scatter = dcc.Graph(id="correlation-scatter",)
 clustering_title = html.Div(
@@ -78,7 +78,13 @@ clustering_method_dropdown = dcc.Dropdown(
     id="clustering-method-dropdown",
     options=[{"label": method, "value": method} for method in CLUSTERING_METHODS],
     style={"width": "400px"},
-    placeholder="Select clustering method",
+    placeholder="Select clustering method (default K-means)",
+)
+clustering_cluster_nb_dropdown = dcc.Dropdown(
+    id="clustering-cluster-nb-dropdown",
+    options=[{"label": cluster_nb, "value": cluster_nb} for cluster_nb in range(1, 6)],
+    style={"width": "400px"},
+    placeholder="Select the number of cluster (default 3)",
 )
 clustering_scatter = dcc.Graph(id="clustering-scatter",)
 
@@ -106,8 +112,11 @@ app.layout = html.Div(
                 html.Div(id="correlation-plot", children=[correlation_scatter]),
                 html.Div(id="clustering-title", children=[clustering_title]),
                 html.Div(
-                    id="clustering-dropdown",
-                    children=[clustering_method_dropdown],
+                    id="clustering-dropdowns",
+                    children=[
+                        clustering_method_dropdown,
+                        clustering_cluster_nb_dropdown,
+                    ],
                     style={
                         "display": "flex",
                         "align-items": "center",
@@ -162,7 +171,7 @@ def update_correlation_scatter_figure(
                 "marker": {
                     "color": IRIS_DATA["colors"],
                     "size": 20,
-                    "line": {"width": 3, "color": "white"},
+                    "line": {"width": 3, "color": "black"},
                 },
             },
         ],
@@ -188,10 +197,14 @@ def update_correlation_scatter_figure(
         Input("correlation-x-axis-dropdown", "value"),
         Input("correlation-y-axis-dropdown", "value"),
         Input("clustering-method-dropdown", "value"),
+        Input("clustering-cluster-nb-dropdown", "value"),
     ],
 )
 def update_clustering_scatter_figure(
-    x_axis_dropdown_value: str, y_axis_dropdown_value: str, clustering_method: str
+    x_axis_dropdown_value: str,
+    y_axis_dropdown_value: str,
+    clustering_method: str,
+    cluster_nb: int,
 ) -> typing.Dict:
     """
     Callback aimed to update clustering scatter content by selecting x and y axis data
@@ -202,6 +215,7 @@ def update_clustering_scatter_figure(
     :param y_axis_dropdown_value: the name of the data that will be displayed in the y
     axis
     :param clustering_method: the name of the clustering method
+    :param cluster_nb: the number of cluster
     :return: the data and the layout content
     """
     if x_axis_dropdown_value is None:
@@ -210,6 +224,8 @@ def update_clustering_scatter_figure(
         y_axis_dropdown_value = "sepal_width"
     if clustering_method is None:
         clustering_method = "K-means"
+    if cluster_nb is None:
+        cluster_nb = 3
     x_data = IRIS_DATA[x_axis_dropdown_value]
     y_data = IRIS_DATA[y_axis_dropdown_value]
     figure = {
@@ -225,14 +241,13 @@ def update_clustering_scatter_figure(
                     "line": {
                         "width": 3,
                         "color": compute_clustering(
-                            x_data, y_data, clustering_method, 3,
+                            x_data, y_data, clustering_method, cluster_nb,
                         ),
                     },
                 },
             },
         ],
         "layout": {
-            "title": "Results",
             "xaxis": {"title": "Sepal length", "zeroline": False},
             "yaxis": {"title": "Sepal width", "zeroline": False},
             "hovermode": "closest",
