@@ -236,14 +236,11 @@ def update_clustering_scatter_figure(
                 "text": IRIS_DATA["species"],
                 "mode": "markers",
                 "marker": {
-                    "color": IRIS_DATA["colors"],
+                    "color": compute_clustering(
+                        x_data, y_data, clustering_method, cluster_nb,
+                    ),
                     "size": 20,
-                    "line": {
-                        "width": 3,
-                        "color": compute_clustering(
-                            x_data, y_data, clustering_method, cluster_nb,
-                        ),
-                    },
+                    "line": {"width": 3, "color": "black"},
                 },
             },
         ],

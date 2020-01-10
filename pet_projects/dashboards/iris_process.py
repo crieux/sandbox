@@ -145,7 +145,7 @@ def compute_clustering(
         return clustering.labels_
     if method == "Mean shift":
         clustering = MeanShift(bandwidth=2).fit(mapped_data)
-        return clustering.labels
+        return clustering.labels_
     if method == "Spectral clustering":
         clustering = SpectralClustering(
             n_clusters=nb_clusters, assign_labels="discretize", random_state=0
