@@ -12,7 +12,10 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 
 # Process
-from pet_projects.dashboards.iris_process import parse_iris_data
+from pet_projects.dashboards.iris_process import (
+    parse_iris_data,
+    compute_pearson_correlation_coefficient,
+)
 
 
 ##########################################################################################
@@ -143,11 +146,14 @@ def update_figure(
         x_axis_dropdown_value = "sepal_length"
     if y_axis_dropdown_value is None:
         y_axis_dropdown_value = "sepal_width"
+    x_data = IRIS_DATA[x_axis_dropdown_value]
+    y_data = IRIS_DATA[y_axis_dropdown_value]
+    coef, p_value = compute_pearson_correlation_coefficient(x_data, y_data)
     data = {
         "data": [
             {
-                "x": IRIS_DATA[x_axis_dropdown_value],
-                "y": IRIS_DATA[y_axis_dropdown_value],
+                "x": x_data,
+                "y": y_data,
                 "text": IRIS_DATA["species"],
                 "mode": "markers",
                 "marker": {
@@ -159,7 +165,7 @@ def update_figure(
             },
         ],
         "layout": {
-            "title": "Results",
+            "title": f"Pearson correlation coefficient: {coef}, p-value: {p_value}",
             "xaxis": {
                 "title": x_axis_dropdown_value.capitalize().replace("_", " "),
                 "zeroline": False,

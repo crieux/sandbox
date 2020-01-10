@@ -7,9 +7,11 @@ from pet_projects.dashboards.config import IRIS_DATA_PATH
 
 # Python
 import random
+import typing
 
 # Data science
 import pandas as pd
+import scipy.stats as ss
 
 
 ################################################################################
@@ -60,3 +62,18 @@ def parse_iris_data() -> pd.DataFrame:
     for specie in iris_species:
         iris_data["colors"].replace(specie, set_random_color(), inplace=True)
     return iris_data
+
+
+def compute_pearson_correlation_coefficient(
+    x_data: pd.DataFrame, y_data: pd.DataFrame
+) -> typing.Tuple[float, float]:
+    """
+    Compute the Pearson correlation coefficient from Scipy library :
+    https://docs.scipy.org/doc/scipy-0.14.0/reference/generated/scipy.stats.pearsonr.html
+
+    :param x_data: the x data set
+    :param y_data: the y data set
+    :return: the Pearson correlation coefficient and the associated p-value
+    """
+    coef, p_value = ss.pearsonr(x_data, y_data)
+    return round(coef, 2), round(p_value, 2)
