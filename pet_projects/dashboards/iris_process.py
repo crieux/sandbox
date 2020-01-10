@@ -1,6 +1,6 @@
-################################################################################
-#                              IMPORT LIBRARIES
-################################################################################
+##########################################################################################
+#                                     IMPORT LIBRARIES
+##########################################################################################
 
 # Config
 from pet_projects.dashboards.config import IRIS_DATA_PATH
@@ -11,12 +11,33 @@ import typing
 
 # Data science
 import pandas as pd
+import numpy as np
+from decimal import Decimal
 import scipy.stats as ss
+from sklearn.cluster import KMeans
+from sklearn.cluster import AffinityPropagation
 
 
-################################################################################
-#                                 FUNCTIONS
-################################################################################
+##########################################################################################
+#                                       FUNCTIONS
+##########################################################################################
+
+CLUSTERING_METHODS = [
+    "K-means",
+    "Affinity propagation",
+    "Mean-shift",
+    "Special clustering",
+    "Ward hierarchical clustering",
+    "DBSCAN",
+    "OPTICS",
+    "Gaussian mixtures",
+    "Birch",
+]
+
+
+##########################################################################################
+#                                       FUNCTIONS
+##########################################################################################
 
 
 def set_random_hex() -> int:
@@ -65,15 +86,41 @@ def parse_iris_data() -> pd.DataFrame:
 
 
 def compute_pearson_correlation_coefficient(
-    x_data: pd.DataFrame, y_data: pd.DataFrame
+    x_data: pd.Series, y_data: pd.Series
 ) -> typing.Tuple[float, float]:
     """
-    Compute the Pearson correlation coefficient from Scipy library :
+    Compute the Pearson correlation coefficient from Scipy library:
     https://docs.scipy.org/doc/scipy-0.14.0/reference/generated/scipy.stats.pearsonr.html
 
     :param x_data: the x data set
     :param y_data: the y data set
-    :return: the Pearson correlation coefficient and the associated p-value
+    :return: the rounded Pearson correlation coefficient and the associated p-value
     """
     coef, p_value = ss.pearsonr(x_data, y_data)
-    return round(coef, 2), round(p_value, 2)
+    return round(coef, 2), "%.2E" % Decimal(p_value)
+
+
+def compute_clustering(
+    x_data: pd.Series, y_data: pd.Series, method: str, nb_clusters: int
+) -> np.array:
+    """
+    Compute clustering using Scikit-learn:
+    https://scikit-learn.org/stable/modules/clustering.html
+    Several algorithms can be chosen:
+        - K-means: https://scikit-learn.org/stable/modules/clustering.html#k-means
+        - Affinity propagation: https://scikit-learn.org/stable/modules/generated/sklearn\
+        .cluster.AffinityPropagation.html#sklearn.cluster.AffinityPropagation
+
+    :param x_data: the x data set
+    :param y_data: the y data set
+    :param method: name of the algorithm used to perform clustering
+    :param nb_clusters: number of clusters used to split data
+    :return: the data set labels used to color scatter points
+    """
+    mapped_data = [row for row in zip(x_data, y_data)]
+    if method == "K-means":
+        kmeans = KMeans(n_clusters=nb_clusters, random_state=0).fit(mapped_data)
+        return kmeans.labels_
+    if method == "Affinity propagation":
+        clustering = AffinityPropagation().fit(mapped_data)
+        return clustering.labels_
