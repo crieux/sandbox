@@ -14,15 +14,17 @@ import pandas as pd
 import numpy as np
 from decimal import Decimal
 import scipy.stats as ss
-from sklearn.cluster import KMeans
-from sklearn.cluster import AffinityPropagation
-from sklearn.cluster import MeanShift
-from sklearn.cluster import SpectralClustering
-from sklearn.cluster import AgglomerativeClustering
-from sklearn.cluster import DBSCAN
-from sklearn.cluster import OPTICS
-from sklearn.cluster import Birch
-
+from sklearn.cluster import (
+    KMeans,
+    AffinityPropagation,
+    MeanShift,
+    SpectralClustering,
+    AgglomerativeClustering,
+    DBSCAN,
+    OPTICS,
+    Birch,
+)
+from sklearn.mixture import BayesianGaussianMixture
 
 ##########################################################################################
 #                                       FUNCTIONS
@@ -36,7 +38,7 @@ CLUSTERING_METHODS = [
     "Ward hierarchical clustering",
     "DBSCAN",
     "OPTICS",
-    "Gaussian mixtures",
+    "Bayesian gaussian mixtures",
     "Birch",
 ]
 
@@ -127,6 +129,8 @@ def compute_clustering(
         DBSCAN.html#sklearn.cluster.DBSCAN
         - OPTICS: https://scikit-learn.org/stable/modules/generated/sklearn.cluster.\
         OPTICS.html#sklearn.cluster.OPTICS
+        - Bayesian gaussian mixtures: https://scikit-learn.org/stable/modules/generated/\
+        sklearn.mixture.BayesianGaussianMixture.html
         - Birch: https://scikit-learn.org/stable/modules/generated/sklearn.cluster.Birch.\
         html#sklearn.cluster.Birch
 
@@ -160,6 +164,12 @@ def compute_clustering(
     if method == "OPTICS":
         clustering = OPTICS(min_samples=2).fit(mapped_data)
         return clustering.labels_
+    if method == "Bayesian gaussian mixtures":
+        bgm = BayesianGaussianMixture(
+            n_components=nb_clusters, max_iter=100, tol=1e-3, reg_covar=0
+        )
+        bgm.fit(mapped_data)
+        return bgm.predict(mapped_data)
     if method == "Birch":
         brc = Birch(n_clusters=nb_clusters)
         brc.fit(mapped_data)

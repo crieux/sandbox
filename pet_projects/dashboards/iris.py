@@ -84,7 +84,7 @@ clustering_cluster_nb_dropdown = dcc.Dropdown(
     id="clustering-cluster-nb-dropdown",
     options=[{"label": cluster_nb, "value": cluster_nb} for cluster_nb in range(1, 6)],
     style={"width": "400px"},
-    placeholder="Select the number of cluster (default 3)",
+    placeholder="Select the number of clusters or components (default 3)",
 )
 clustering_scatter = dcc.Graph(id="clustering-scatter",)
 
