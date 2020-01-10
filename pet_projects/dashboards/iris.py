@@ -150,10 +150,10 @@ def update_figure(
                 "y": IRIS_DATA[y_axis_dropdown_value],
                 "text": IRIS_DATA["species"],
                 "mode": "markers",
-                "opacity": 0.7,
                 "marker": {
                     "color": IRIS_DATA["colors"],
-                    "size": 8,
+                    "size": 15,
+                    # "opacity": 0.7,
                     "line": {"width": 0.5, "color": "white"},
                 },
             },
