@@ -70,7 +70,7 @@ correlation_y_axis_dropdown = dcc.Dropdown(
     style={"width": "400px"},
     placeholder="Select y axis data (default Sepal width)",
 )
-correlation_scatter = dcc.Graph(id="correlation-scatter",)
+correlation_scatter = dcc.Loading(dcc.Graph(id="correlation-scatter",), type="graph")
 clustering_title = html.Div(
     children="Finding cluster(s)", style={"text-align": "center"},
 )
@@ -86,7 +86,9 @@ clustering_cluster_nb_dropdown = dcc.Dropdown(
     style={"width": "400px"},
     placeholder="Select the number of clusters or components (default 3)",
 )
-clustering_scatter = dcc.Graph(id="clustering-scatter",)
+clustering_scatter = dcc.Loading(
+    children=dcc.Graph(id="clustering-scatter",), type="graph"
+)
 
 app.layout = html.Div(
     children=[
@@ -129,6 +131,7 @@ app.layout = html.Div(
         ),
     ]
 )
+
 
 ##########################################################################################
 #                                       CALLBACKS
@@ -254,7 +257,7 @@ def update_clustering_scatter_figure(
 
 
 ##########################################################################################
-#                                       RUN SERVER
+#                                    RUNNING SERVER
 ##########################################################################################
 
 if __name__ == "__main__":
