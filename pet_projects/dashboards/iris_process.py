@@ -27,7 +27,7 @@ from sklearn.cluster import (
 from sklearn.mixture import BayesianGaussianMixture
 
 ##########################################################################################
-#                                       FUNCTIONS
+#                                        CONSTANTS
 ##########################################################################################
 
 CLUSTERING_METHODS = [
