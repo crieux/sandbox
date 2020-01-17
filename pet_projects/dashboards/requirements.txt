@@ -92,3 +92,4 @@ toolz==0.10.0
 typed-ast==1.4.0
 urllib3==1.25.7
 Werkzeug==0.16.0
+xlrd==1.2.0
