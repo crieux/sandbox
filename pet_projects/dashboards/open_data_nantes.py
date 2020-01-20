@@ -5,10 +5,12 @@
 # Python
 import typing
 import json
+import copy
 
 # Config
 from pet_projects.dashboards.open_data_nantes_process import (
     get_mapbox_token,
+    MAP_FIG,
     get_nantes_district_data,
 )
 
@@ -34,8 +36,7 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 # Header layout part
 page_title = html.H1(
-    children="Simple example of Plotly Dashboard based on Nantes open data",
-    style={"text-align": "center"},
+    children="Simple example of Plotly Dashboard", style={"text-align": "center"},
 )
 page_header = html.Div(
     children="(Powered by Dash: A web application framework for Python)",
@@ -45,22 +46,6 @@ page_header = html.Div(
 # Map layout part
 map_title = html.Div(
     children='Open data from "Nantes métropole"', style={"text-align": "center"},
-)
-data = [go.Scattermapbox(mode="markers+lines", line={"width": 2}, marker={"size": 11},)]
-layout = go.Layout(
-    height=700,
-    autosize=True,
-    showlegend=False,
-    hovermode="closest",
-    geo={"projection": {"type": "equirectangular"}},
-    mapbox={
-        "accesstoken": get_mapbox_token(),
-        "bearing": 1,
-        "center": {"lon": -1.5534, "lat": 47.2173},
-        "pitch": 0,
-        "zoom": 12,
-        "style": "outdoors",
-    },
 )
 district_dropdown = dcc.Dropdown(
     id="districts-dropdown",
@@ -72,7 +57,7 @@ district_dropdown = dcc.Dropdown(
     style={"width": "400px", "margin-right": 5},
     placeholder="Select a district...",
 )
-mapbox = dcc.Graph(id="map", figure={"data": data, "layout": layout})
+mapbox = dcc.Graph(id="map", figure=MAP_FIG, animate=False)
 
 app.layout = html.Div(
     children=[
@@ -118,74 +103,23 @@ def update_displayed_district(
     Update the displayed district on the map
 
     :param district_polygon_geometry: the geometry of the district to be displayed
-    :return: the figure layout
+    :return: the figure
     """
     if district_polygon_geometry is None:
-        return {
-            "data": [
-                go.Scattermapbox(
-                    mode="markers+lines", line={"width": 2}, marker={"size": 11},
-                )
-            ],
-            "layout": go.Layout(
-                height=700,
-                autosize=True,
-                showlegend=False,
-                hovermode="closest",
-                geo={"projection": {"type": "equirectangular"}},
-                mapbox={
-                    "accesstoken": get_mapbox_token(),
-                    "bearing": 1,
-                    "center": {"lon": -1.5534, "lat": 47.2173},
-                    "pitch": 0,
-                    "zoom": 12,
-                    "style": "outdoors",
-                },
-            ),
+        return MAP_FIG
+    figure = copy.deepcopy(MAP_FIG)
+    current_layer = figure["layout"]["mapbox"]["layers"]
+    figure["layout"]["mapbox"]["layers"] = list(current_layer) + [
+        {
+            "sourcetype": "geojson",
+            "source": {"type": "Feature", "geometry": json.loads(geometry)},
+            "color": "blue",
+            "opacity": 0.7,
+            "type": "line",
         }
-    district_data = get_nantes_district_data()
-    district_name = district_data["Quartier"].loc[
-        district_data["Géométrie"].isin(district_polygon_geometry)
+        for geometry in district_polygon_geometry
     ]
-    figure_layout = {
-        "data": [
-            go.Scattermapbox(
-                mode="markers+lines", line={"width": 2}, marker={"size": 11},
-            )
-        ],
-        "layout": go.Layout(
-            title=f'Open data from "Nantes métropole" for "{", ".join(district_name)}"',
-            height=700,
-            autosize=True,
-            showlegend=False,
-            hovermode="closest",
-            geo={"projection": {"type": "equirectangular"}},
-            mapbox={
-                "accesstoken": get_mapbox_token(),
-                "bearing": 1,
-                "center": {"lon": -1.5534, "lat": 47.2173},
-                "pitch": 0,
-                "zoom": 12,
-                "style": "outdoors",
-                "layers": [
-                    {
-                        "sourcetype": "geojson",
-                        "source": {
-                            "type": "Feature",
-                            "properties": {},
-                            "geometry": json.loads(geometry),
-                        },
-                        # "source": "https://raw.githubusercontent.com/plotly/datasets/master/florida-red-data.json",
-                        "color": "blue",
-                        "opacity": 0.7,
-                        "type": "line",
-                    }
-                    for geometry in district_polygon_geometry
-                ],
-            },
-        ),
-    }
-    return figure_layout
+    return figure
 
 
 ##########################################################################################
