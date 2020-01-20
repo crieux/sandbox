@@ -9,14 +9,12 @@ import copy
 
 # Config
 from pet_projects.dashboards.open_data_nantes_process import (
-    get_mapbox_token,
     MAP_FIG,
     get_nantes_district_data,
 )
 
 # Dashboard
 import dash
-import plotly.graph_objects as go
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
