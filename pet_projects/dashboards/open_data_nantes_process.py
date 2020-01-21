@@ -89,8 +89,12 @@ MAP_FIG = {
             lat=[row["geometry.coordinates"][1]],
             mode="markers",
             textposition="bottom center",
-            text=f"{row['fields.grp_horodatage']}<br>{row['fields.grp_disponible']}"
-            f" sur {row['fields.grp_exploitation']} places disponibles",
+            text=f"{row['fields.grp_nom']}<br>"
+            f"{row['fields.adresse']}<br>"
+            f"{row['fields.grp_horodatage']}<br>"
+            f"{row['fields.grp_disponible']}"
+            f" sur {row['fields.grp_exploitation']} places disponibles<br>",
+            # f"{row['fields.acces_transports_communs']}",
             hoverinfo="text",
             showlegend=False,
             marker={"symbol": "car", "size": 15},
@@ -100,6 +104,7 @@ MAP_FIG = {
     "layout": go.Layout(
         height=700,
         hovermode="closest",
+        hoverlabel={"bgcolor": "blue"},
         geo={"projection": {"type": "equirectangular"}},
         mapbox={
             "accesstoken": get_mapbox_token(),
