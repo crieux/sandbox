@@ -10,7 +10,7 @@ import copy
 # Config
 from pet_projects.dashboards.open_data_nantes_process import (
     MAP_FIG,
-    get_nantes_district_data,
+    get_nantes_districts_data,
 )
 
 # Dashboard
@@ -45,11 +45,15 @@ page_header = html.Div(
 map_title = html.Div(
     children='Open data from "Nantes métropole"', style={"text-align": "center"},
 )
-district_dropdown = dcc.Dropdown(
+
+districts_dropdown = dcc.Dropdown(
     id="districts-dropdown",
     options=[
-        {"label": district["Quartier"].capitalize(), "value": district["Géométrie"]}
-        for index, district in get_nantes_district_data().iterrows()
+        {
+            "label": district["fields.nom"].capitalize(),
+            "value": f"{district['fields.geometry.coordinates']}",
+        }
+        for index, district in get_nantes_districts_data().iterrows()
     ],
     multi=True,
     style={"width": "400px", "margin-right": 5},
@@ -70,7 +74,7 @@ app.layout = html.Div(
                 html.Div(id="map-title", children=map_title),
                 html.Div(
                     id="districts-dropdowns",
-                    children=[district_dropdown],
+                    children=[districts_dropdown],
                     style={
                         "display": "flex",
                         "align-items": "center",
@@ -94,28 +98,32 @@ app.layout = html.Div(
 @app.callback(
     Output("map", "figure"), [Input("districts-dropdown", "value")],
 )
-def update_displayed_district(
-    district_polygon_geometry: typing.List[typing.Dict],
-) -> typing.Dict:
+def update_map(districts_geometry_coordinates: typing.List[str],) -> typing.Dict:
     """
-    Update the displayed district on the map
+    Update the layers of the map for districts, etc...
 
-    :param district_polygon_geometry: the geometry of the district to be displayed
+    :param districts_geometry_coordinates: the geometry of the district to be displayed
     :return: the figure
     """
-    if district_polygon_geometry is None:
+    if districts_geometry_coordinates is None:
         return MAP_FIG
     figure = copy.deepcopy(MAP_FIG)
     current_layer = figure["layout"]["mapbox"]["layers"]
     figure["layout"]["mapbox"]["layers"] = list(current_layer) + [
         {
             "sourcetype": "geojson",
-            "source": {"type": "Feature", "geometry": json.loads(geometry)},
+            "source": {
+                "type": "Feature",
+                "geometry": {
+                    "type": "Polygon",
+                    "coordinates": json.loads(geometry_coordinates),
+                },
+            },
             "color": "blue",
             "opacity": 0.7,
             "type": "line",
         }
-        for geometry in district_polygon_geometry
+        for geometry_coordinates in districts_geometry_coordinates
     ]
     return figure
 
